@@ -18,8 +18,8 @@ public class UserProfile {
 
     @Column(name = "user_id", nullable = false, unique = true)
     private Long userId;
-
+// private uer uerId
     private boolean online;
-    private String about;
+    private String name;
 }
 

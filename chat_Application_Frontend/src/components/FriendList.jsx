@@ -12,11 +12,11 @@ export default function FriendList({ friends = [], selectedId, onSelect }) {
       {friends.map((f) => (
         <ListItemButton key={f.id} selected={selectedId === f.id} onClick={() => onSelect(f)}>
           <ListItemAvatar>
-            <Badge color={f.online ? 'success' : 'default'} variant="dot" overlap="circular">
-              <Avatar>{(f.username || '').charAt(0).toUpperCase()}</Avatar>
+            <Badge color={f.name ? 'success' : 'default'} variant="dot" overlap="circular">
+              <Avatar>{(f.name || '').charAt(0).toUpperCase()}</Avatar>
             </Badge>
           </ListItemAvatar>
-          <ListItemText primary={f.username} secondary={f.status || (f.online ? 'Online' : 'Offline')} />
+          <ListItemText primary={f.name} secondary={f.status || (f.online ? 'Online' : 'Offline')} />
         </ListItemButton>
       ))}
     </List>

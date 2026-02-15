@@ -76,7 +76,7 @@ public class FriendService {
 
         UserProfile user = userRepo.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
+        System.out.println("friendRepo.findByUserProfile(user)  "+friendRepo.findByUserProfile(user));
         return friendRepo.findByUserProfile(user)
                 .stream()
                 .map(Friend::getFriendProfile)

@@ -1,0 +1,174 @@
+/* Global theme variables and simple utility styles */
+:root {
+  --bg: #0f172a;
+  --card: #111827;
+  --muted: #9aa4b2;
+  --text: #e6eef8;
+  --accent: #6366f1;
+  --accent-600: #4f46e5;
+  --error: #ef4444;
+  --glass: rgba(255,255,255,0.03);
+  --glass-border: rgba(255,255,255,0.06);
+  --radius: 16px;
+}
+
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --muted: #566274;
+  --text: #0b1220;
+  --accent: #6366f1;
+  --accent-600: #4f46e5;
+  --error: #dc2626;
+  --glass: rgba(0,0,0,0.02);
+  --glass-border: rgba(0,0,0,0.06);
+}
+
+/* Page layout */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: radial-gradient(ellipse at 10% 20%, rgba(99,102,241,0.08), transparent 10%),
+              radial-gradient(ellipse at 90% 80%, rgba(59,130,246,0.04), transparent 10%),
+              var(--bg);
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ensure global body and root use the theme variables */
+html, body {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+/* Force MUI Paper/AppBar to follow theme variables */
+.MuiPaper-root, .MuiAppBar-root {
+  background: var(--card) !important;
+  color: var(--text) !important;
+}
+
+.glow { position: absolute; width: 20rem; height: 20rem; border-radius: 50%; filter: blur(80px); opacity: .6; }
+.glow-left { left: -6rem; top: 10%; background: var(--accent); }
+.glow-right { right: -6rem; bottom: 10%; background: rgba(99,102,241,0.12); }
+
+.login-wrapper { width: 100%; max-width: 420px; z-index: 10; }
+.login-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--glass-border);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+}
+
+.login-header { text-align: center; margin-bottom: 1.5rem; }
+.logo-blob { display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:12px; background: linear-gradient(135deg,var(--accent),var(--accent-600)); box-shadow: 0 6px 18px rgba(79,70,229,0.18); margin:0 auto 0.6rem; }
+.logo-icon { width:28px; height:28px; color: white; }
+.login-header h2 { font-size: 1.5rem; margin:0; }
+.muted { color: var(--muted); margin-top:0.35rem; }
+
+.login-form { display:flex; flex-direction:column; gap:0.85rem; }
+.field label { display:block; font-size:0.85rem; text-align:left; margin-bottom:0.35rem; color:var(--muted); }
+.input-wrap { position:relative; }
+.field-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); }
+.input { width:100%; padding:0.75rem 0.9rem 0.75rem 36px; border-radius:12px; border:1px solid var(--glass-border); background: var(--card); color:var(--text); outline:none; }
+.input::placeholder { color:var(--muted); }
+.input:focus { box-shadow:0 6px 18px rgba(99,102,241,0.09); border-color:var(--accent-600); }
+
+.error { background: rgba(239,68,68,0.06); color:var(--error); border:1px solid rgba(239,68,68,0.12); padding:0.5rem 0.75rem; border-radius:10px; font-size:0.9rem; }
+
+.btn-primary { display:inline-flex; align-items:center; justify-content:center; gap:0.6rem; width:100%; padding:0.75rem; border-radius:12px; border:none; background:linear-gradient(90deg,var(--accent),var(--accent-600)); color:white; font-weight:600; cursor:pointer; }
+.btn-primary:disabled { opacity:0.7; cursor:not-allowed; }
+.spinner { width:18px; height:18px; animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.signup { text-align:center; margin-top:1rem; color:var(--muted); }
+.linkish { color:var(--accent); cursor:pointer; }
+
+/* Utility: prefer-system theme on first load */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) { --bg: #f8fafc; --card:#fff; --text:#0b1220; --muted:#566274; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) { --bg: #0b1220; --card:#0f172a; --text:#e6eef8; --muted:#9aa4b2; }
+}
+
+/* AppBar button tweaks */
+.theme-toggle-btn { border-radius: 8px; }
+.theme-toggle-btn:hover { background: rgba(99,102,241,0.06); }
+
+/* MUI TextField overrides for consistent dark/light input appearance */
+.MuiTextField-root .MuiInputBase-root, .MuiTextField-root .MuiOutlinedInput-root {
+  background: var(--card);
+  color: var(--text);
+}
+.MuiOutlinedInput-root.Mui-disabled { background: var(--card); opacity: 0.7; }
+.MuiInputBase-input { color: var(--text); }
+.MuiOutlinedInput-notchedOutline { border-color: rgba(255,255,255,0.06); }
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color: var(--accent-600); }
+
+.signout-btn { border-radius: 8px; text-transform: none; }
+
+/* Chat page specific styles */
+.chat-main { background: var(--bg); color: var(--text); min-height: 100vh; }
+.messages-container { border: 1px solid rgba(255,255,255,0.04); background: var(--card); }
+.msg-row { display:flex; margin-bottom:0.5rem; }
+.msg-row-me { justify-content:flex-end; }
+.msg-row-them { justify-content:flex-start; }
+.msg-bubble { max-width:72%; padding:0.6rem 0.9rem; border-radius:12px; box-shadow: 0 6px 18px rgba(2,6,23,0.25); }
+.msg-me { background: linear-gradient(90deg,var(--accent),var(--accent-600)); color: white; border-top-left-radius:12px; border-top-right-radius:4px; }
+.msg-them { background: rgba(255,255,255,0.02); color: var(--text); border-top-left-radius:4px; border-top-right-radius:12px; }
+.msg-bubble { animation: msgIn 260ms cubic-bezier(.2,.9,.2,1); }
+
+/* Sender and timestamp styling */
+.msg-sender { font-weight:700; color: var(--muted); font-size:0.75rem; }
+.msg-ts { font-size:0.7rem; color: var(--muted); opacity:0.9; }
+
+/* smoother theme transitions */
+:root, [data-theme] { transition: background-color 200ms ease, color 200ms ease; }
+
+/* ------------------------------------------------------------------
+   Explicit per-html theme rules (higher specificity) to avoid browser
+   differences when applying variables. These force backgrounds and
+   MUI surfaces to use the theme variables so Chrome and Edge match.
+   ------------------------------------------------------------------ */
+html[data-theme="light"] {
+  --bg: #efbd84;        /* soft cream */
+  --card: #695d5d;      /* white card surfaces */
+  --text: #0b1220;      /* dark text for readability */
+  --muted: #6b7280;     /* muted text */
+  --accent: #6366f1;
+  --accent-600: #4f46e5;
+}
+
+html[data-theme="dark"] {
+  --bg: #0b1220;
+  --card: #0f172a;
+  --text: #e6eef8;
+  --muted: #9aa4b2;
+  --accent: #6366f1;
+  --accent-600: #4f46e5;
+}
+
+/* Apply forced backgrounds and text color to root elements and common MUI surfaces */
+html[data-theme="light"] , html[data-theme="light"] body,
+html[data-theme="light"] .MuiPaper-root, html[data-theme="light"] .MuiAppBar-root,
+html[data-theme="light"] .login-container, html[data-theme="light"] .chat-main {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+html[data-theme="dark"] , html[data-theme="dark"] body,
+html[data-theme="dark"] .MuiPaper-root, html[data-theme="dark"] .MuiAppBar-root,
+html[data-theme="dark"] .login-container, html[data-theme="dark"] .chat-main {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+
+
+

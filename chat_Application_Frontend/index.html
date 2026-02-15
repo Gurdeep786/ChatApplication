@@ -8,6 +8,20 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Set theme early from localStorage (or default to dark) so CSS variables apply consistently across browsers -->
+    <script>
+      (function(){
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'light' || t === 'dark') {
+            document.documentElement.setAttribute('data-theme', t);
+          } else {
+            // Force a deterministic default so browser theme changes don't alter page colors
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch(e) { try{document.documentElement.setAttribute('data-theme','dark')}catch(e){} }
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

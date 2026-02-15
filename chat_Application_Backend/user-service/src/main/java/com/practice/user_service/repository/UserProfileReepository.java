@@ -14,7 +14,6 @@ public interface UserProfileReepository
 
     Optional<UserProfile> findByUserId(Long userId);
 
-//    Optional<Object> findByUserName(String friendUsername);
-
+    Optional<Object> findByName(String friendUsername);
 
 }

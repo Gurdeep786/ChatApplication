@@ -1,0 +1,98 @@
+:root {
+  /* delegate to global theme variables; provide fallbacks */
+  --bg-color: var(--bg, #0f172a);
+  --card-bg: var(--card, #1e293b);
+  --accent-color: var(--accent, #6366f1);
+  --text-main: var(--text, #f8fafc);
+  --text-dim: var(--muted, #94a3b8);
+}
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color);
+  font-family: 'Inter', sans-serif;
+}
+
+.login-card {
+  background: var(--card-bg);
+  padding: 2.5rem;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 
+              0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.login-header h1 {
+  color: var(--text-main);
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.login-header p {
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  display: block;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--card-bg);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  color: var(--text-main);
+  transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
+}
+
+.login-button {
+  width: 100%;
+  padding: 0.8rem;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 1rem;
+}
+
+.login-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.login-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.login-footer a {
+  color: var(--accent-color);
+  text-decoration: none;
+}

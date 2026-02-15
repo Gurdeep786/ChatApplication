@@ -30,7 +30,7 @@ public class AuthService {
         if (!user.getPassword().equals(password)) {
             throw new RuntimeException("Invalid username or password");
         }
-
+        System.out.println("user"+user);
         return jwtUtil.generateToken(user.getId(),username);
     }
 }
