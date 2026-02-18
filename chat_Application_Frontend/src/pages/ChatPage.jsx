@@ -295,35 +295,29 @@ export default function ChatPage() {
 
                 return (
                   <Box key={i} className={isMe ? "msg-row msg-row-me" : "msg-row msg-row-them"}>
+                    {/* Left meta: timestamp for received messages */}
+                    {!isMe && (
+                      <div className="msg-meta">
+                        <div className="msg-time">{m.timestamp ? new Date(m.timestamp).toLocaleTimeString() : ''}</div>
+                      </div>
+                    )}
+
                     <Box className={isMe ? "msg-bubble msg-me" : "msg-bubble msg-them"}>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          display: "block",
-                          mb: 0.5,
-                          textAlign: isMe ? "right" : "left",
-                          fontWeight: 600,
-                        }}
-                         className="msg-sender"
-                      >
-                        {senderName}
-                      </Typography>
-                      <Typography variant="body2">{text}</Typography>
-                      {m.timestamp && (
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            display: "block",
-                            mt: 0.5,
-                            textAlign: isMe ? "right" : "left",
-                            color: "text.secondary",
-                          }}
-                           className="msg-ts"
-                        >
-                          {new Date(m.timestamp).toLocaleString()}
-                        </Typography>
-                      )}
+                      <div className="msg-header">
+                        <span className="msg-sender">{senderName}</span>
+                      </div>
+                      <div className="msg-body">{text}</div>
+                      {/* {m.timestamp && (
+                        <div className="msg-ts">{new Date(m.timestamp).toLocaleString()}</div>
+                      )} */}
                     </Box>
+
+                    {/* Right meta for sent messages */}
+                    {isMe && (
+                      <div className="msg-meta msg-meta-right">
+                        <div className="msg-time">{m.timestamp ? new Date(m.timestamp).toLocaleTimeString() : ''}</div>
+                      </div>
+                    )}
                   </Box>
                 );
               });

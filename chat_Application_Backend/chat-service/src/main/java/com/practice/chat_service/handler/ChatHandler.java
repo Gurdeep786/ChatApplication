@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.practice.chat_service.model.ChatMessage;
 import com.practice.chat_service.service.ChatService;
 import com.practice.chat_service.service.RedisPresenceService;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.socket.*;
@@ -25,14 +27,19 @@ public class ChatHandler extends TextWebSocketHandler {
     private final ChatService chatService;
     private final RedisPresenceService presenceService;
     private final WebClient webClient;
-
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ChannelTopic topic;
     public ChatHandler(ChatService chatService,
                        RedisPresenceService presenceService,
-                       WebClient.Builder builder) {
+                       WebClient.Builder builder,
+     RedisTemplate<String, Object>redisTemplate, // Added
+                       ChannelTopic topic) {
 
         this.chatService = chatService;
         this.presenceService = presenceService;
         this.webClient = builder.baseUrl("http://USER-SERVICE").build();
+        this.redisTemplate = redisTemplate;
+        this.topic = topic;
     }
 
     // 🔥 username → active sessions
@@ -91,7 +98,41 @@ public class ChatHandler extends TextWebSocketHandler {
     }
 
 
+    private void syncFriendStatus(WebSocketSession session, String username) {
+        try {
+            // Fetch friend list for the person who just logged in
+            String response = webClient
+                    .get()
+                    .uri("/user/friends/listName/" + username)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
 
+            if (response == null) return;
+            JsonNode root = mapper.readTree(response);
+
+            for (JsonNode friend : root) {
+                String friendName = friend.get("name").asText();
+
+                // Check if this friend has any active sessions
+                boolean isFriendOnline = presenceService.isUserOnline(friendName);
+
+                if (isFriendOnline) {
+                    String message = """
+                {
+                  "type": "PRESENCE",
+                  "username": "%s",
+                  "online": true
+                }
+                """.formatted(friendName);
+
+                    session.sendMessage(new TextMessage(message));
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error syncing initial presence: " + e.getMessage());
+        }
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -103,6 +144,7 @@ public class ChatHandler extends TextWebSocketHandler {
                 .add(session);
         presenceService.setUserOnline(username);
         broadcastPresence(username, true);
+        syncFriendStatus(session, username);
         System.out.println("🟢 USER CONNECTED: " + username);
         System.out.println("📡 ACTIVE USER SESSIONS:");
 
@@ -142,20 +184,38 @@ System.out.println(chatMessage);
 
         String json = mapper.writeValueAsString(messagePayload);
 // 2️⃣ Send to receiver if online
-        Set<WebSocketSession> receiverSessions =
-                userSessions.get(chatMessage.getReceiver());
-
-        if (receiverSessions != null) {
-            for (WebSocketSession s : receiverSessions) {
-                if (s.isOpen()) {
-                    s.sendMessage(new TextMessage(json));
-                }
-            }
-        }
-
+//        Set<WebSocketSession> receiverSessions =
+//                userSessions.get(chatMessage.getReceiver());
+//
+//        if (receiverSessions != null) {
+//            for (WebSocketSession s : receiverSessions) {
+//                if (s.isOpen()) {
+//                    s.sendMessage(new TextMessage(json));
+//                }
+//            }
+//        }
+        redisTemplate.convertAndSend(topic.getTopic(), json);
 
     }
-
+    public void handleRedisMessage(String message) {
+        try {
+            System.out.println("message ="+message);
+            JsonNode jsonNode = mapper.readTree(message);
+            String receiver = jsonNode.get("receiver").asText();
+            System.out.println("receiver ="+receiver);
+            // Check if the receiver is connected to THIS specific server instance
+            Set<WebSocketSession> localSessions = userSessions.get(receiver);
+            if (localSessions != null) {
+                for (WebSocketSession s : localSessions) {
+                    if (s.isOpen()) {
+                        s.sendMessage(new TextMessage(message));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error handling Redis message: " + e.getMessage());
+        }
+    }
     @Override
     public void afterConnectionClosed(
             WebSocketSession session,
@@ -163,13 +223,15 @@ System.out.println(chatMessage);
 
         String username =
                 (String) session.getAttributes().get("username");
-        presenceService.setUserOffline(username);
-        broadcastPresence(username, false);
+
+
         Set<WebSocketSession> sessions = userSessions.get(username);
         if (sessions != null) {
             sessions.remove(session);
             if (sessions.isEmpty()) {
                 userSessions.remove(username);
+                broadcastPresence(username, false);
+                presenceService.setUserOffline(username);
             }
         }
 

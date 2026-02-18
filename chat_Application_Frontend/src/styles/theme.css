@@ -12,17 +12,8 @@
   --radius: 16px;
 }
 
-[data-theme="light"] {
-  --bg: #f8fafc;
-  --card: #ffffff;
-  --muted: #566274;
-  --text: #0b1220;
-  --accent: #6366f1;
-  --accent-600: #4f46e5;
-  --error: #dc2626;
-  --glass: rgba(0,0,0,0.02);
-  --glass-border: rgba(0,0,0,0.06);
-}
+/* NOTE: per-html theme blocks are defined later (html[data-theme=...])
+   to keep a single authoritative source for each theme. */
 
 /* Page layout */
 .login-page {
@@ -41,14 +32,14 @@
 
 /* Ensure global body and root use the theme variables */
 html, body {
-  background: var(--bg) !important;
-  color: var(--text) !important;
+  background: var(--bg);
+  color: var(--text);
 }
 
 /* Force MUI Paper/AppBar to follow theme variables */
 .MuiPaper-root, .MuiAppBar-root {
-  background: var(--card) !important;
-  color: var(--text) !important;
+  background: var(--card);
+  color: var(--text);
 }
 
 .glow { position: absolute; width: 20rem; height: 20rem; border-radius: 50%; filter: blur(80px); opacity: .6; }
@@ -137,37 +128,114 @@ html, body {
    MUI surfaces to use the theme variables so Chrome and Edge match.
    ------------------------------------------------------------------ */
 html[data-theme="light"] {
-  --bg: #efbd84;        /* soft cream */
-  --card: #695d5d;      /* white card surfaces */
-  --text: #0b1220;      /* dark text for readability */
-  --muted: #6b7280;     /* muted text */
-  --accent: #6366f1;
-  --accent-600: #4f46e5;
+  /* Grey + yellow pattern look */
+  --bg: #f3f4f6; /* base light grey */
+  --card: #ffffff; /* card surface */
+  --text: #0b1220; /* dark text */
+  --muted: #6b7280; /* muted text */
+  --accent: #f59e0b; /* amber/yellow accent */
+  --accent-600: #d97706;
+  --pattern: linear-gradient(135deg, rgba(249,115,22,0.03) 0%, rgba(156,163,175,0.03) 50%, rgba(250,204,21,0.02) 100%);
 }
 
 html[data-theme="dark"] {
-  --bg: #0b1220;
-  --card: #0f172a;
-  --text: #e6eef8;
+  --bg: #071028; /* deeper cool dark */
+  --card: #071427; /* card slightly different */
+  --text: #e7f0fb;
   --muted: #9aa4b2;
-  --accent: #6366f1;
-  --accent-600: #4f46e5;
+  --accent: #5b7cff;
+  --accent-600: #4360e6;
 }
 
 /* Apply forced backgrounds and text color to root elements and common MUI surfaces */
 html[data-theme="light"] , html[data-theme="light"] body,
 html[data-theme="light"] .MuiPaper-root, html[data-theme="light"] .MuiAppBar-root,
 html[data-theme="light"] .login-container, html[data-theme="light"] .chat-main {
-  background: var(--bg) !important;
-  color: var(--text) !important;
+  /* add subtle patterned background on light */
+  background: var(--pattern), var(--bg);
+  color: var(--text);
 }
 
 html[data-theme="dark"] , html[data-theme="dark"] body,
 html[data-theme="dark"] .MuiPaper-root, html[data-theme="dark"] .MuiAppBar-root,
 html[data-theme="dark"] .login-container, html[data-theme="dark"] .chat-main {
-  background: var(--bg) !important;
-  color: var(--text) !important;
+  background: var(--bg);
+  color: var(--text);
 }
+
+/* ------------------------------------------------------------------
+   Input, Button and MUI overrides to ensure visibility and modern look
+   ------------------------------------------------------------------ */
+/* Root level inputs */
+.MuiOutlinedInput-root {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  border-radius: 12px;
+  padding: 2px;
+}
+.MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255,255,255,0.06);
+}
+.MuiOutlinedInput-root .MuiInputBase-input {
+  color: var(--text);
+  padding: 12px 14px;
+}
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--accent-600);
+  /* color-mix() is not supported everywhere; use rgba fallback for shadow */
+  box-shadow: 0 8px 30px rgba(67,96,230,0.14);
+}
+
+/* Make sure placeholder and label are visible */
+.MuiInputLabel-root { color: var(--muted); }
+.MuiInputLabel-root.Mui-focused { color: var(--accent-600); }
+.MuiFormHelperText-root { color: var(--muted); }
+
+/* Chat input specific adjustments */
+.messages-container .MuiOutlinedInput-root, .chat-main .MuiOutlinedInput-root {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* Buttons */
+.MuiButton-contained {
+  background: linear-gradient(90deg, var(--accent), var(--accent-600));
+  color: white;
+  box-shadow: 0 8px 24px rgba(2,6,23,0.35);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.MuiButton-contained:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(2,6,23,0.45); }
+
+/* Ensure input visible in dark mode specifically */
+html[data-theme="dark"] .MuiOutlinedInput-root { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); }
+html[data-theme="dark"] .MuiInputBase-input { color: var(--text); }
+
+/* Light mode specific button accent (yellow) */
+html[data-theme="light"] .MuiButton-contained { background: linear-gradient(90deg, var(--accent), var(--accent-600)); color: #111827; }
+
+/* Small icon-friendly class for send icon spacing */
+.btn-icon { display:inline-flex; align-items:center; gap:0.6rem; }
+
+
+/* Friend list status dot */
+.status-dot { display:inline-block; width:12px; height:12px; border-radius:50%; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+.status-dot.online { background: linear-gradient(135deg,#34d399,#10b981); box-shadow: 0 0 12px rgba(16,185,129,0.18); animation: pulse 2s infinite; }
+.status-dot.offline { background: #6b7280; opacity: 0.8; }
+
+@keyframes pulse { 0% { transform: scale(1); opacity:1 } 50% { transform: scale(1.08); opacity:0.8 } 100% { transform: scale(1); opacity:1 } }
+
+/* Message meta (left timestamp) */
+.msg-row { align-items:flex-end; }
+.msg-meta { width:64px; display:flex; align-items:flex-end; justify-content:center; color:var(--muted); font-size:0.75rem; padding:0 8px; }
+.msg-meta-right { order: 2; }
+.msg-bubble { order: 1; }
+.msg-header { margin-bottom:0.25rem; }
+.msg-body { font-size:0.95rem; line-height:1.35; }
+.msg-ts { font-size:0.7rem; color:var(--muted); margin-top:6px; text-align:right; }
+
+/* subtle glass effect for message bubbles */
+.msg-me { background: linear-gradient(90deg,var(--accent) 0%, var(--accent-600) 100%); box-shadow: 0 8px 24px rgba(79,70,229,0.12); }
+.msg-them { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.03); }
+
 
 
 

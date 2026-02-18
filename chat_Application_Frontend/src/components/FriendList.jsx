@@ -5,6 +5,13 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
+import Box from '@mui/material/Box';
+
+function StatusDot({ online }) {
+  return (
+    <span className={online ? 'status-dot online' : 'status-dot offline'} aria-hidden />
+  );
+}
 
 export default function FriendList({ friends = [], selectedId, onSelect }) {
   return (
@@ -12,11 +19,17 @@ export default function FriendList({ friends = [], selectedId, onSelect }) {
       {friends.map((f) => (
         <ListItemButton key={f.id} selected={selectedId === f.id} onClick={() => onSelect(f)}>
           <ListItemAvatar>
-            <Badge color={f.name ? 'success' : 'default'} variant="dot" overlap="circular">
-              <Avatar>{(f.name || '').charAt(0).toUpperCase()}</Avatar>
-            </Badge>
+            <Box sx={{ position: 'relative' }}>
+              <Avatar sx={{ bgcolor: 'var(--accent)' }}>{(f.name || '').charAt(0).toUpperCase()}</Avatar>
+              <span style={{ position: 'absolute', right: -2, bottom: -2 }}>
+                <StatusDot online={!!f.online} />
+              </span>
+            </Box>
           </ListItemAvatar>
-          <ListItemText primary={f.name} secondary={f.status || (f.online ? 'Online' : 'Offline')} />
+          <ListItemText
+            primary={<span className="friend-name">{f.name}</span>}
+            secondary={<span className="friend-status">{f.status || (f.online ? 'Online' : 'Offline')}</span>}
+          />
         </ListItemButton>
       ))}
     </List>

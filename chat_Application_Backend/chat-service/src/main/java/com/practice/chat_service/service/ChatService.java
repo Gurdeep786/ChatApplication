@@ -3,6 +3,8 @@ package com.practice.chat_service.service;
 
 import com.practice.chat_service.model.ChatMessageEntity;
 import com.practice.chat_service.repository.ChatMessageRepository;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,7 +22,8 @@ public class ChatService {
     public void saveMessage(
             String sender,
             String receiver,
-            String content) {
+            String content
+           ) {
 
         ChatMessageEntity entity = new ChatMessageEntity();
         entity.setSender(sender);
