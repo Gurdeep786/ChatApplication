@@ -6,6 +6,8 @@ import com.practice.user_service.repository.FriendRepository;
 
 import com.practice.user_service.repository.UserProfileReepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,11 +19,13 @@ public class FriendService {
 
     private final UserProfileReepository userRepo;
     private final FriendRepository friendRepo;
-
+    private final StringRedisTemplate redisTemplate;
     public FriendService(UserProfileReepository userRepo,
-                         FriendRepository friendRepo) {
+                         FriendRepository friendRepo,StringRedisTemplate redisTemplate) {
         this.userRepo = userRepo;
         this.friendRepo = friendRepo;
+        this.redisTemplate = redisTemplate;
+
     }
 
     // ➕ ADD FRIEND (ID-based ONLY)
@@ -80,6 +84,15 @@ public class FriendService {
         return friendRepo.findByUserProfile(user)
                 .stream()
                 .map(Friend::getFriendProfile)
+                .peek(friend -> {
+
+                        Boolean isOnline = redisTemplate.hasKey(
+                                "online:user:" + friend.getName()
+                        );
+
+                        friend.setOnline(Boolean.TRUE.equals(isOnline));
+
+                })
                 .toList();
     }
 }

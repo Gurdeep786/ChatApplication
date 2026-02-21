@@ -1,34 +1,36 @@
-import { useState, useContext, useRef } from "react";
-import { loginUser } from "../api/authApi";
-import { AuthContext } from "../context/AuthContext";
+import { useState } from "react";
+import { registerUser } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
-import { Lock, User, Loader2, LogIn } from "lucide-react";
 
-export default function Login() {
-  const { login } = useContext(AuthContext);
-  const navigate = useNavigate();
+export default function Register() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const usernameRef = useRef(null);
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const submit = async (e) => {
-    e?.preventDefault();
+    e.preventDefault();
+    setError("");
+    setSuccess("");
     if (!form.username.trim() || !form.password) {
       setError("Please fill in all fields");
       return;
     }
+    if (form.password.length < 5) {
+      setError("Password must be at least 5 characters");
+      return;
+    }
     setLoading(true);
-    setError("");
     try {
-      const token = await loginUser({
+      await registerUser({
         username: form.username.trim(),
         password: form.password,
       });
-      login(token, form.username.trim());
-      navigate("/chat");
+      setSuccess("Registration successful! Please login.");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
-      setError(err?.response?.data?.message || "Invalid credentials");
+      setError(err?.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -36,65 +38,44 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <div className="glow glow-left" aria-hidden />
-      <div className="glow glow-right" aria-hidden />
-
       <div className="login-wrapper">
         <div className="login-card">
           <div className="login-header">
-            <div className="logo-blob">
-              <LogIn className="logo-icon" />
-            </div>
-            <h2>Welcome Back</h2>
-            <p className="muted">Sign in to start chatting</p>
+            <h2>Register</h2>
+            <p className="muted">Create your account</p>
           </div>
-
           <form onSubmit={submit} className="login-form">
             <div className="field">
               <label>Username</label>
               <div className="input-wrap">
-                <User className="field-icon" />
                 <input
-                  ref={usernameRef}
                   type="text"
                   placeholder="Enter username"
                   value={form.username}
                   onChange={(e) => setForm({ ...form, username: e.target.value })}
-                  autoFocus
                   className="input"
                 />
               </div>
             </div>
-
             <div className="field">
               <label>Password</label>
               <div className="input-wrap">
-                <Lock className="field-icon" />
                 <input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="At least 5 characters"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   className="input"
                 />
               </div>
             </div>
-
             {error && <div className="error">{error}</div>}
-
+            {success && <div className="success">{success}</div>}
             <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? (
-                <>
-                  <Loader2 className="spinner" />
-                  <span>Connecting...</span>
-                </>
-              ) : (
-                "Sign In"
-              )}
+              {loading ? "Registering..." : "Register"}
             </button>
           </form>
-
-          <p className="signup">New here? <span className="linkish" onClick={() => navigate('/register')}>Create an account</span></p>
+          <p className="signup">Already have an account? <span className="linkish" onClick={() => navigate("/login")}>Login</span></p>
         </div>
       </div>
     </div>

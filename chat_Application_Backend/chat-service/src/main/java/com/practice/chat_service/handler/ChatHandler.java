@@ -167,7 +167,11 @@ System.out.println(chatMessage);
 // 1️⃣ Save message ALWAYS
         String sender =
                 (String) session.getAttributes().get("username");
-
+        if ("HEARTBEAT".equalsIgnoreCase(chatMessage.getType())) {
+            System.out.println("💓 Heartbeat received from: " + sender);
+            presenceService.refreshUserOnline(sender);
+            return;
+        }
 
         String receiver = chatMessage.getReceiver();
         String content  = chatMessage.getContent();

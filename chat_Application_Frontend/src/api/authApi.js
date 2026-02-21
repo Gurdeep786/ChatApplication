@@ -15,3 +15,17 @@ export const loginUser = async (data) => {
 
   return res.data; // JWT token
 };
+
+// Register user
+export const registerUser = async (data) => {
+  const res = await axios.post(
+    `${API}/register`,
+    data,
+    {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  );
+  return res.data;
+};

@@ -8,6 +8,6 @@ export const searchUser = (username) => {
   return axiosClient.get(`/user/search?username=${username}`);
 };
 
-export const addFriend = (id) => {
-  return axiosClient.post(`/user/friends/add/${id}`);
+export const addFriend = (username, friendUsername) => {
+  return axiosClient.post(`/user/profile/add?username=${username}&friendUsername=${friendUsername}`);
 };

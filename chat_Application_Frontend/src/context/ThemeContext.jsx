@@ -6,24 +6,16 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     try {
       const t = localStorage.getItem("theme");
-      return t === "light" || t === "dark" ? t : null;
+      return t === "light" || t === "dark" ? t : "light"; // 🔥 default here
     } catch {
-      return null;
+      return "dark"; // 🔥 default fallback
     }
   });
 
   useEffect(() => {
-    try {
-      if (theme) {
-        localStorage.setItem("theme", theme);
-        document.documentElement.setAttribute("data-theme", theme);
-      } else {
-        localStorage.removeItem("theme");
-        document.documentElement.removeAttribute("data-theme");
-      }
-    } catch (e) {
-      // ignore
-    }
+    debugger
+    localStorage.setItem("theme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
   return (

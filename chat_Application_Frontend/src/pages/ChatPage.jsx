@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useContext } from "react";
 import { createChatSocket } from "../api/socketClient";
-import { getFriends, searchUser, addFriend } from "../api/userApi";
+import { getFriends, addFriend } from "../api/userApi";
 import { getChatHistory } from "../api/chatApi";
 
 import Box from "@mui/material/Box";
@@ -29,7 +29,7 @@ export default function ChatPage() {
   const [drawerOpen, setDrawerOpen] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResult, setSearchResult] = useState(null);
+  // Remove searchResult state
   const [snack, setSnack] = useState({
     open: false,
     severity: "info",
@@ -59,8 +59,19 @@ export default function ChatPage() {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((t) => (t === "light" ? "dark" : t === "dark" ? null : "dark"));
+    setTheme((t) => (t === "light" ? "dark" : "light"));
   };
+  useEffect(() => {
+  const interval = setInterval(() => {
+    if (socketRef.current?.readyState === WebSocket.OPEN) {
+      socketRef.current.send(
+        JSON.stringify({ type: "HEARTBEAT" })
+      );
+    }
+  }, 10000); // every 10 sec
+
+  return () => clearInterval(interval);
+}, []);
   useEffect(() => {
     fetchFriends();
 
@@ -77,7 +88,9 @@ export default function ChatPage() {
           );
           return; // do NOT add to messages
         }
-
+        if (!friends.find((f) => f.name === parsed.sender)) {
+            fetchFriends();
+        }
         // 🔥 NORMAL CHAT MESSAGE
         setMessages((prev) => [...prev, parsed]);
       } catch (err) {
@@ -94,6 +107,7 @@ export default function ChatPage() {
   const fetchFriends = async () => {
     try {
       const res = await getFriends(userId);
+
       setFriends(res.data || []);
     } catch (e) {
       setSnack({
@@ -160,24 +174,28 @@ export default function ChatPage() {
     setOutgoing("");
   };
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
-    try {
-      const res = await searchUser(searchTerm.trim());
-      setSearchResult(res.data || null);
-    } catch (e) {
-      setSnack({ open: true, severity: "error", msg: "Search failed" });
-    }
-  };
+  // Removed handleSearch logic
 
-  const handleAdd = async (id) => {
+  const handleAdd = async (friendUsername) => {
+    if (!friendUsername.trim()) {
+      setSnack({
+        open: true,
+        severity: "error",
+        msg: "Please enter a username",
+      });
+      return;
+    }
     try {
-      await addFriend(id);
+      await addFriend(username, friendUsername.trim());
       setSnack({ open: true, severity: "success", msg: "Friend added" });
       setAddOpen(false);
       fetchFriends();
     } catch (e) {
-      setSnack({ open: true, severity: "error", msg: "Failed to add friend" });
+      setSnack({
+        open: true,
+        severity: "error",
+        msg: e?.response?.data?.message || "Failed to add friend",
+      });
     }
   };
   console.log(messages);
@@ -188,7 +206,11 @@ export default function ChatPage() {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Chat Dashboard
           </Typography>
-          <IconButton color="inherit" onClick={() => setAddOpen(true)} aria-label="add friend">
+          <IconButton
+            color="inherit"
+            onClick={() => setAddOpen(true)}
+            aria-label="add friend"
+          >
             <AddIcon />
           </IconButton>
 
@@ -204,7 +226,12 @@ export default function ChatPage() {
           </IconButton>
 
           {/* Sign out */}
-          <Button color="inherit" onClick={logout} className="signout-btn" startIcon={<LogOut />}>
+          <Button
+            color="inherit"
+            onClick={logout}
+            className="signout-btn"
+            startIcon={<LogOut />}
+          >
             Sign out
           </Button>
         </Toolbar>
@@ -225,18 +252,30 @@ export default function ChatPage() {
         </Box>
       </Drawer>
 
-  <Box component="main" className="chat-main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+      <Box
+        component="main"
+        className="chat-main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          mt: 8,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        }}
+      >
         <Typography variant="h5" gutterBottom>
           Messages
         </Typography>
-
-        <Box className="messages-container"
+        <Box
+          className="messages-container"
           sx={{
-            mb: 2,
-            height: "70vh",
-            overflow: "auto",
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
             p: 2,
             borderRadius: 1,
+            mb: 2,
           }}
         >
           {!selectedFriend ? (
@@ -245,12 +284,9 @@ export default function ChatPage() {
             </Typography>
           ) : (
             (() => {
-              debugger;
               const conv = messages.filter((m) => {
                 const to = m.to ?? m.receiver ?? null;
                 const from = m.from ?? m.sender ?? null;
-                // debugger
-                // helpers to test equality against friend and current user
                 const isToFriend =
                   to === selectedFriend?.id ||
                   to === selectedKey ||
@@ -263,24 +299,17 @@ export default function ChatPage() {
                   from === selectedFriend?.about;
                 const isToMe = to == username;
                 const isFromMe = from == username || m.fromMe === true;
-
-                // message should be between (me <-> friend)
                 const between =
                   (isFromFriend && isToMe) || (isFromMe && isToFriend);
-
-                // also include messages that are missing explicit from/to (fallback)
                 const unknown = !to && !from;
-
                 return between || unknown;
               });
-
               if (conv.length === 0)
                 return (
                   <Typography color="text.secondary">
                     No messages yet with {selectedFriend.username}
                   </Typography>
                 );
-
               return conv.map((m, i) => {
                 const text =
                   m.text ?? m.content ?? (typeof m === "string" ? m : "");
@@ -292,30 +321,39 @@ export default function ChatPage() {
                 const senderName = isMe
                   ? username || "You"
                   : (m.sender ?? m.from ?? "");
-
                 return (
-                  <Box key={i} className={isMe ? "msg-row msg-row-me" : "msg-row msg-row-them"}>
-                    {/* Left meta: timestamp for received messages */}
+                  <Box
+                    key={i}
+                    className={
+                      isMe ? "msg-row msg-row-me" : "msg-row msg-row-them"
+                    }
+                  >
                     {!isMe && (
                       <div className="msg-meta">
-                        <div className="msg-time">{m.timestamp ? new Date(m.timestamp).toLocaleTimeString() : ''}</div>
+                        <div className="msg-time">
+                          {m.timestamp
+                            ? new Date(m.timestamp).toLocaleTimeString()
+                            : ""}
+                        </div>
                       </div>
                     )}
-
-                    <Box className={isMe ? "msg-bubble msg-me" : "msg-bubble msg-them"}>
+                    <Box
+                      className={
+                        isMe ? "msg-bubble msg-me" : "msg-bubble msg-them"
+                      }
+                    >
                       <div className="msg-header">
                         <span className="msg-sender">{senderName}</span>
                       </div>
                       <div className="msg-body">{text}</div>
-                      {/* {m.timestamp && (
-                        <div className="msg-ts">{new Date(m.timestamp).toLocaleString()}</div>
-                      )} */}
                     </Box>
-
-                    {/* Right meta for sent messages */}
                     {isMe && (
                       <div className="msg-meta msg-meta-right">
-                        <div className="msg-time">{m.timestamp ? new Date(m.timestamp).toLocaleTimeString() : ''}</div>
+                        <div className="msg-time">
+                          {m.timestamp
+                            ? new Date(m.timestamp).toLocaleTimeString()
+                            : ""}
+                        </div>
                       </div>
                     )}
                   </Box>
@@ -324,7 +362,6 @@ export default function ChatPage() {
             })()
           )}
         </Box>
-
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             fullWidth
@@ -358,25 +395,12 @@ export default function ChatPage() {
             fullWidth
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd(searchTerm)}
           />
-
-          {searchResult && (
-            <Box sx={{ mt: 2 }}>
-              <Typography>{searchResult.username}</Typography>
-              <Button
-                variant="contained"
-                onClick={() => handleAdd(searchResult.id)}
-                sx={{ mt: 1 }}
-              >
-                Add
-              </Button>
-            </Box>
-          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddOpen(false)}>Cancel</Button>
-          <Button onClick={handleSearch}>Search</Button>
+          <Button onClick={() => handleAdd(searchTerm)}>Add</Button>
         </DialogActions>
       </Dialog>
 

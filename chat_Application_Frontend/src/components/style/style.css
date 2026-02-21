@@ -1,4 +1,4 @@
-:root {
+/* :root {
   /* delegate to global theme variables; provide fallbacks */
   --bg-color: var(--bg, #0f172a);
   --card-bg: var(--card, #1e293b);
@@ -95,4 +95,4 @@
 .login-footer a {
   color: var(--accent-color);
   text-decoration: none;
-}
+} */
