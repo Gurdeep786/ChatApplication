@@ -51,7 +51,7 @@ public class ChatHandler extends TextWebSocketHandler {
 
 
 
-    private void broadcastPresence(String username, boolean online) {
+    public void broadcastPresence(String username, boolean online) {
 
         try {
 
@@ -169,7 +169,12 @@ System.out.println(chatMessage);
                 (String) session.getAttributes().get("username");
         if ("HEARTBEAT".equalsIgnoreCase(chatMessage.getType())) {
             System.out.println("💓 Heartbeat received from: " + sender);
+            boolean wasOnline = presenceService.isUserOnline(sender);
             presenceService.refreshUserOnline(sender);
+            if (!wasOnline) {
+                System.out.println("🟢 User back online via heartbeat: " + sender);
+                broadcastPresence(sender, true);
+            }
             return;
         }
 
