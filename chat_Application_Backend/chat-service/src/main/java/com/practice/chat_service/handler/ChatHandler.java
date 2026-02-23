@@ -368,7 +368,7 @@ public class ChatHandler extends TextWebSocketHandler {
         System.out.println("Sender: " + sender);
         System.out.println("Receiver: " + chatMessage.getReceiver());
         System.out.println("Content: " + chatMessage.getContent());
-
+        chatMessage.setSender(sender);
         chatService.saveMessage(sender,
                 chatMessage.getReceiver(),
                 chatMessage.getContent());
