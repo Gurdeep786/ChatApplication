@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useContext } from "react";
 import { createChatSocket } from "../api/socketClient";
 import { getFriends, addFriend } from "../api/userApi";
 import { getChatHistory } from "../api/chatApi";
-
+import { createTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import FriendList from "../components/FriendList";
@@ -11,6 +11,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
@@ -22,6 +23,7 @@ import Alert from "@mui/material/Alert";
 import AddIcon from "@mui/icons-material/Add";
 import { AuthContext } from "../context/AuthContext";
 import { Sun, Moon, LogOut } from "lucide-react";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
@@ -62,16 +64,14 @@ export default function ChatPage() {
     setTheme((t) => (t === "light" ? "dark" : "light"));
   };
   useEffect(() => {
-  const interval = setInterval(() => {
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(
-        JSON.stringify({ type: "HEARTBEAT" })
-      );
-    }
-  }, 10000); // every 10 sec
+    const interval = setInterval(() => {
+      if (socketRef.current?.readyState === WebSocket.OPEN) {
+        socketRef.current.send(JSON.stringify({ type: "HEARTBEAT" }));
+      }
+    }, 10000); // every 10 sec
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, []);
   useEffect(() => {
     fetchFriends();
 
@@ -89,7 +89,7 @@ export default function ChatPage() {
           return; // do NOT add to messages
         }
         if (!friends.find((f) => f.name === parsed.sender)) {
-            fetchFriends();
+          fetchFriends();
         }
         // 🔥 NORMAL CHAT MESSAGE
         setMessages((prev) => [...prev, parsed]);
@@ -143,7 +143,7 @@ export default function ChatPage() {
   };
 
   const sendMessage = () => {
-    debugger;
+   
     if (!outgoing.trim()) return;
     const payload = {
       receiver: selectedKey ?? selectedFriend?.name,
@@ -199,13 +199,27 @@ export default function ChatPage() {
     }
   };
   console.log(messages);
+  const muiTheme = useTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
+
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       <AppBar position="fixed">
         <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Chat Dashboard
-          </Typography>
+         {isMobile && (
+        <IconButton
+          color="inherit"
+          edge="start"
+          onClick={() => setDrawerOpen(true)}
+          sx={{ mr: 2 }}
+        >
+          <MenuIcon />
+        </IconButton>
+      )}
+
+      <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        {username }
+      </Typography>
           <IconButton
             color="inherit"
             onClick={() => setAddOpen(true)}
@@ -236,18 +250,29 @@ export default function ChatPage() {
           </Button>
         </Toolbar>
       </AppBar>
-
+      
       <Drawer
-        variant="permanent"
-        open={drawerOpen}
-        sx={{ width: 300, flexShrink: 0, mt: 8 }}
+        variant={isMobile ? "temporary" : "permanent"}
+        open={isMobile ? drawerOpen : true}
+        onClose={() => setDrawerOpen(false)}
+        sx={{
+          width: 200,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: 200,
+            mt: 8,
+          },
+        }}
       >
         <Toolbar />
-        <Box sx={{ width: 300, mt: 2 }}>
+        <Box sx={{ width: 200, mt: 0 ,paddingTop:0}}>
           <FriendList
             friends={friends}
             selectedId={selectedFriend?.id}
-            onSelect={handleSelectFriend}
+            onSelect={(friend) => {
+              handleSelectFriend(friend);
+              if (isMobile) setDrawerOpen(false); // close after select
+            }}
           />
         </Box>
       </Drawer>
@@ -273,7 +298,7 @@ export default function ChatPage() {
             flex: 1,
             minHeight: 0,
             overflowY: "auto",
-            p: 2,
+            p: 0,
             borderRadius: 1,
             mb: 2,
           }}
@@ -327,6 +352,7 @@ export default function ChatPage() {
                     className={
                       isMe ? "msg-row msg-row-me" : "msg-row msg-row-them"
                     }
+                    // sx={{maxWidth:"60%", wordBreak: "break-word"}}
                   >
                     {!isMe && (
                       <div className="msg-meta">

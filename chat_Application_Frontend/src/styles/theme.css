@@ -151,8 +151,8 @@ html, body {
   flex: 1 1 auto;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  max-height: 60vh;
-  min-height: 120px;
+  max-height: 70vh;
+  min-height: 130px;
   margin-bottom: 1rem;
 }
 
@@ -161,12 +161,14 @@ html, body {
 }
 
 @media (max-width: 900px) {
-  .messages-container { max-height: 40vh; }
+  .messages-container { max-height: 60vh; }
 }
 .msg-row { display:flex; margin-bottom:0.5rem; }
 .msg-row-me { justify-content:flex-end; }
 .msg-row-them { justify-content:flex-start; }
-.msg-bubble { max-width:72%; padding:0.6rem 0.9rem; border-radius:12px; box-shadow: 0 6px 18px rgba(2,6,23,0.25); }
+.msg-bubble { display: inline-block;word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;max-width:62%; padding:0.6rem 0.9rem; border-radius:12px; box-shadow: 0 6px 18px rgba(2,6,23,0.25); }
 .msg-me { background: linear-gradient(90deg,var(--accent),var(--accent-600)); color: white; border-top-left-radius:12px; border-top-right-radius:4px; }
 .msg-them { background: rgba(255,255,255,0.02); color: var(--text); border-top-left-radius:4px; border-top-right-radius:12px; }
 .msg-bubble { animation: msgIn 260ms cubic-bezier(.2,.9,.2,1); }
@@ -214,7 +216,7 @@ html[data-theme="light"] .MuiPaper-root,
 html[data-theme="light"] .MuiAppBar-root,
 html[data-theme="light"] .login-container,
 html[data-theme="light"] .chat-main {
-  background-color: #def3ad; /* solid fallback */
+  background-color: #f7f7f453; /* solid fallback */
   background-image: var(--pattern);
   color: var(--text);
 }
