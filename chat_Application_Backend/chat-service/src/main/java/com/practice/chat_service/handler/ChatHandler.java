@@ -258,6 +258,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.practice.chat_service.model.ChatMessage;
 import com.practice.chat_service.service.ChatService;
 import com.practice.chat_service.service.RedisPresenceService;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
@@ -279,7 +281,8 @@ public class ChatHandler extends TextWebSocketHandler {
 
     private final ChannelTopic chatTopic;
     private final ChannelTopic presenceTopic;
-
+    @Value("${server.port}")
+    private String serverPort;
     public ChatHandler(ChatService chatService,
                        RedisPresenceService presenceService,
                        WebClient.Builder builder,
@@ -312,6 +315,7 @@ public class ChatHandler extends TextWebSocketHandler {
 
         System.out.println("\n==========================================");
         System.out.println("🟢 CONNECT EVENT");
+        System.out.println("🟢 CONNECT EVENT server port: " + serverPort);
         System.out.println("User: " + username);
 
         userSessions

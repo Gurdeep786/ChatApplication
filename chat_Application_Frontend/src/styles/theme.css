@@ -137,14 +137,7 @@ html, body {
 .signout-btn { border-radius: 8px; text-transform: none; }
 
 /* Chat page specific styles */
-.chat-main {
-  /* background: var(--bg); */
-  /* color: var(--text); */
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
+
 .messages-container {
   border: 1px solid var(--glass-border);
   background: var(--card);
@@ -156,9 +149,9 @@ html, body {
   margin-bottom: 1rem;
 }
 
-.chat-main > .messages-container {
+/* .chat-main > .messages-container {
   flex: 1;
-}
+} */
 
 @media (max-width: 900px) {
   .messages-container { max-height: 60vh; }

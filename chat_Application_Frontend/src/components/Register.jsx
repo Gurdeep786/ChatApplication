@@ -9,33 +9,38 @@ export default function Register() {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
-  const submit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-    if (!form.username.trim() || !form.password) {
-      setError("Please fill in all fields");
-      return;
-    }
-    if (form.password.length < 5) {
-      setError("Password must be at least 5 characters");
-      return;
-    }
-    setLoading(true);
-    try {
-      await registerUser({
-        username: form.username.trim(),
-        password: form.password,
-      });
-      setSuccess("Registration successful! Please login.");
-      setTimeout(() => navigate("/login"), 1500);
-    } catch (err) {
-      setError(err?.response?.data?.message || "Registration failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+ const submit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setSuccess("");
 
+  const usernameRegex = /^\S{3,10}$/;     // only digits 3-10 length
+  const passwordRegex = /^\S{5,10}$/;     // no spaces, 5-10 chars
+
+  if (!usernameRegex.test(form.username)) {
+    setError("Username must be 3 to 10 characters and contain no spaces.");
+    return;
+  }
+
+  if (!passwordRegex.test(form.password)) {
+    setError("Password must be 5 to 10 characters and contain no spaces.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await registerUser({
+      username: form.username,
+      password: form.password,
+    });
+    setSuccess("Registration successful! Please login.");
+    setTimeout(() => navigate("/login"), 1500);
+  } catch (err) {
+    setError(err?.response?.data?.message || "Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="login-page">
       <div className="login-wrapper">

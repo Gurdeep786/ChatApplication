@@ -31,6 +31,7 @@ export default function ChatPage() {
   const [drawerOpen, setDrawerOpen] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  
   // Remove searchResult state
   const [snack, setSnack] = useState({
     open: false,
@@ -39,6 +40,7 @@ export default function ChatPage() {
   });
   const token = localStorage.getItem("token");
   const socketRef = useRef(null);
+  const messagesEndRef = useRef(null);
   const { userId, username, logout } = useContext(AuthContext);
 
   // Theme toggle (no changes to chat logic)
@@ -49,7 +51,11 @@ export default function ChatPage() {
       return null;
     }
   });
-
+useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [messages]);
   useEffect(() => {
     if (theme) {
       document.documentElement.setAttribute("data-theme", theme);
@@ -168,7 +174,8 @@ export default function ChatPage() {
         fromMe: true,
         content: payload.content,
         receiver: payload.receiver,
-        ts: Date.now(),
+        // ts: Date.now(),
+        timestamp: Date.now(),
       },
     ]);
     setOutgoing("");
@@ -203,7 +210,8 @@ export default function ChatPage() {
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
 
   return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
+    <Box sx={{ display: "flex",  minHeight: "100dvh",cursor: "default",
+    userSelect: "none" }}>
       <AppBar position="fixed">
         <Toolbar>
          {isMobile && (
@@ -217,7 +225,8 @@ export default function ChatPage() {
         </IconButton>
       )}
 
-      <Typography variant="h6" sx={{ flexGrow: 1 }}>
+      <Typography variant="h6" disabled={true} sx={{ flexGrow: 1  ,cursor: "default",
+    userSelect: "none"}}>
         {username }
       </Typography>
           <IconButton
@@ -282,13 +291,15 @@ export default function ChatPage() {
         className="chat-main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          mt: 8,
           display: "flex",
           flexDirection: "column",
-          minHeight: 0,
+           overflow: "hidden", 
+           minHeight: 0
+         
         }}
       >
+         <Toolbar />
+       
         <Typography variant="h5" gutterBottom>
           Messages
         </Typography>
@@ -301,6 +312,7 @@ export default function ChatPage() {
             p: 0,
             borderRadius: 1,
             mb: 2,
+           
           }}
         >
           {!selectedFriend ? (
@@ -387,6 +399,7 @@ export default function ChatPage() {
               });
             })()
           )}
+          <div ref={messagesEndRef} />
         </Box>
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
